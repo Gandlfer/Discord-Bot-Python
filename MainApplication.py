@@ -2,7 +2,8 @@ import os
 
 import discord
 
-token = "NTUwODgzMDE2NTI0NjkzNTA0.XHinyg.Jq_UQI1pikxyjrRVfLI6lW_Eido"
+
+token = open("bot-token","r").read()
 
 client = discord.Client()
 
