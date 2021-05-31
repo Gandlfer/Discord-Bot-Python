@@ -3,7 +3,8 @@ import os
 import discord
 
 print(os.getcwd())
-token = open("bot-token","r").read()
+print(__file__)
+#token = open(os.path.dirname(os.getcwd())+"/bot-token","r").read()
 
 # client = discord.Client()
 
