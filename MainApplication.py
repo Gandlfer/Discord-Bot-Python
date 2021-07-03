@@ -11,9 +11,11 @@ intents.typing = False
 intents.presences = True
 client = discord.Client(intents=intents)
 
+
 @client.event
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
+    await client.change_presence(activity=discord.Game(name="with Caffeine"))
 
 @client.event
 async def on_message(message):
@@ -21,11 +23,16 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('-cc '):
+    if message.content.startswith('-cc'):
         token=message.content.split(" ")
 
-        if(token[1]=="help"):
-            helpEmbed=discord.Embed(title="Commands for CoffeeCup Bot",color=discord.Color.dark_red())
+        if(len(token)<=1):
+            await message.channel.send("Unknown command\n \"-cc help\" for command list")
+            
+        elif(token[1]=="help"):
+            helpEmbed=discord.Embed(title="Commands for CoffeeCup Bot",
+                        description="Link for invite https://discord.com/api/oauth2/authorize?client_id=550883016524693504&permissions=8&scope=bot"
+                        ,color=discord.Color.dark_red())
             helpEmbed.add_field(name="Prefix: ",value="-cc <command> <parameters>" ,inline=False)
             helpEmbed.add_field(name="List of commands:", value="8ball\nuser-stat\nserver-stat\ncopypasta")
 
