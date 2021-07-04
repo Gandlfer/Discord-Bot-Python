@@ -7,7 +7,7 @@ token = open("bot-token","r").read()
 #print(token)
 intents = discord.Intents.default()
 intents.members=True
-intents.typing = False
+intents.typing = True
 intents.presences = True
 client = discord.Client(intents=intents)
 
@@ -16,6 +16,17 @@ client = discord.Client(intents=intents)
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
     await client.change_presence(activity=discord.Game(name="with Caffeine"))
+
+@client.event
+async def on_typing(channel,user,when):
+    userID="{}#{}".format(user.name,user.discriminator)
+    if(userID=="DeIeted User#9267" or userID=="belair#8279"):
+        if(random.randint(0,4)==0):
+            await channel.send("Shut the fuck up {}".format(user.mention))
+            #Keep talking – someday you’ll say something intelligent.
+    # else:
+    #     print("{}#{} chatting in {} - {}".format(user.name,user.discriminator,channel,channel.guild.name))
+
 
 @client.event
 async def on_message(message):
