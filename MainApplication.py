@@ -2,6 +2,8 @@ import os
 import random
 import discord
 import datetime
+import mysql.connector
+from mysql.connector import errorcode
 #import threading
 
 token = open("bot-token","r").read()
@@ -123,8 +125,20 @@ async def on_message(message):
             copypasta=open("copypasta","r",encoding="utf8").read()
             token=copypasta.split("cawfee")
             await message.channel.send(token[random.randint(0,len(token)-1)])
-
+        elif(token[1]=="blackjack"):
+            pass
         else:
             await message.channel.send("Unknown command\n \"-cc help\" for command list")
 
-client.run(token)
+if __name__=="__main__":
+    mydb=mysql.connector.connect(host="192.168.0.252",user="bot",password="Darryllee_99")
+    # try:
+    #     mydb=mysql.connector.connect(host="210.186.45.55",user="root",password="")
+    # except mysql.connector.Error as err:
+    #     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+    #         print("Something is wrong with your user name or password")
+    #     elif err.errno == errorcode.ER_BAD_DB_ERROR:
+    #         print("Database does not exist")
+    #     else:
+    #         print(err)
+    client.run(token)
