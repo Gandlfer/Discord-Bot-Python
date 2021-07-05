@@ -2,6 +2,7 @@ import os
 import random
 import discord
 import datetime
+#import threading
 
 token = open("bot-token","r").read()
 #print(token)
@@ -27,7 +28,6 @@ async def on_typing(channel,user,when):
     # else:
     #     print("{}#{} chatting in {} - {}".format(user.name,user.discriminator,channel,channel.guild.name))
 
-
 @client.event
 async def on_message(message):
     
@@ -38,6 +38,10 @@ async def on_message(message):
         token=message.content.split(" ")
 
         if(len(token)<=1):
+            # print("Called this")
+            # def check(m):
+            #     return m.content == 'hello' and m.channel == message.channel
+            # msg = await client.wait_for('message', check=check)
             await message.channel.send("Unknown command\n \"-cc help\" for command list")
             
         elif(token[1]=="help"):
