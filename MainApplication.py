@@ -131,7 +131,17 @@ async def on_message(message):
             await message.channel.send("Unknown command\n \"-cc help\" for command list")
 
 if __name__=="__main__":
-    mydb=mysql.connector.connect(host="192.168.0.252",user="bot",password="Darryllee_99")
+    try:
+        mydb=mysql.connector.connect(host="192.168.0.252",user="bot",password="Darryllee_99")
+    except mysql.connector.Error as err:
+        mydb=mysql.connector.connect(host="localhost",user="root",password="")
+        # if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        #     print("Something is wrong with your user name or password")
+        # elif err.errno == errorcode.ER_BAD_DB_ERROR:
+        #     print("Database does not exist")
+        # else:
+        #     print(err)
+    #mydb=mysql.connector.connect(host="192.168.0.252",user="bot",password="Darryllee_99")
     # try:
     #     mydb=mysql.connector.connect(host="210.186.45.55",user="root",password="")
     # except mysql.connector.Error as err:
