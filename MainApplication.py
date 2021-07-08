@@ -4,7 +4,6 @@ import discord
 import datetime
 import mysql.connector
 from mysql.connector import errorcode
-from PIL import Image
 
 #import threading
 
