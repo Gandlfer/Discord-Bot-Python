@@ -28,12 +28,34 @@ async def on_typing(channel,user,when):
             #Keep talking – someday you’ll say something intelligent.
     # else:
     #     print("{}#{} chatting in {} - {}".format(user.name,user.discriminator,channel,channel.guild.name))
+def cardSum(arr):
+    cardValue=list()
+    flagA=False
+    sum=0
+    for x in range(0,len(arr)):
+        cardValue.append(arr[x][0].split(":")[1][1:])
+    
+    if "A" in cardValue: flagA=True
+
+    for x in cardValue:
+        if x.isnumeric():
+            sum+=int(x)
+        elif x=="K" or x=="Q" or x=="J":
+            sum+=10
+
+    if flagA and sum<=10:
+        sum+=11
+    elif flagA:
+        sum+=1
+    
+    return sum
 
 def cardsToString(arr):
     string=""
+    
     for x in range(0,len(arr)):
         string+=arr[x][0]
-            
+          
     string+="\n"
 
     for x in range(0,len(arr)):
@@ -147,6 +169,10 @@ async def on_message(message):
             await message.channel.send(token[random.randint(0,len(token)-1)])
 
         elif(token[1]=="blackjack"):
+
+            # Message for instructions
+            await message.channel.send("{}: hit \n {}: Stop ".format("\U0001F447","\U0000270B"))
+
             ranksBlack=["<:bA:623575870375985162>","<:b2:623564440574623774>","<:b3:623564440545263626>",
                 "<:b4:623564440624824320>","<:b5:623564440851316760>","<:b6:623564440679350319>",
                 "<:b7:623564440754978843>","<:b8:623564440826150912>","<:b9:623564440868225025>",
@@ -166,37 +192,57 @@ async def on_message(message):
                 else:
                     cards[x].extend(ranksRed)
             dealers=list()
-            
+            players=list()
+
             suits=random.randint(0,len(cards)-1)
             print(f"Before dealers pop:{len(cards[suits])}")
             dealers.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
             dealers.append(["<:blankbacktop:714565166070759454>","<:blankbackbot:714565093798576455>"])
-            print(f"After dealers pop:{len(cards[suits])}")
-            players=list()
+            print(f"After dealers pop:{len(cards[suits])}")            
             
+            #dealerSum=cardSum(dealers)
+
             suits=random.randint(0,len(cards)-1)
             players.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
 
             suits=random.randint(0,len(cards)-1)
             players.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
 
-            await message.channel.send("Dealer's cards:")
-            dealerCards=await message.channel.send(cardsToString(dealers))
+            dealerSumMessage= await message.channel.send("Dealer's cards: {}".format(cardSum(dealers)))
+            dealerCardsMessage= await message.channel.send(cardsToString(dealers))
 
-            await message.channel.send("Player's cards:")
-            playerCards=await message.channel.send(cardsToString(players))
+            playerSumMessage= await message.channel.send("Player's cards: {}".format(cardSum(players)))
+            playerCardsMessage=await message.channel.send(cardsToString(players))
 
-            await playerCards.add_reaction("\U0001F447")
-            await playerCards.add_reaction("\U0000270B")
+            await playerCardsMessage.add_reaction("\U0001F447") #hit
+            await playerCardsMessage.add_reaction("\U0000270B") #stop
 
-            def check(reaction, user):
-                return user == message.author and (str(reaction.emoji) == "\U0001F447" or str(reaction.emoji) == "\U0000270B")
+            while True:
 
-            
-            reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
-            
-            print(reaction.emoji)
-            print(user.name)
+                                
+
+                def check(reaction, user):
+                    return user == message.author and (str(reaction.emoji) == "\U0001F447" or str(reaction.emoji) == "\U0000270B")
+
+                
+                reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+                if(str(reaction.emoji) == "\U0000270B"):
+                    break
+                else:
+                    #check total
+                    suits=random.randint(0,len(cards)-1)
+                    players.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
+                    total=cardSum(players)
+                    await playerSumMessage.edit(content="Player's cards: {}".format(total))
+                    await playerCardsMessage.edit(content=cardsToString(players))
+                    await playerCardsMessage.remove_reaction("\U0001F447", message.author)   
+                    if(total>21):
+                        await message.channel.send("You lost!")
+                        break
+                    # print(reaction.emoji)
+                    # print(user.name)
+                    pass
+                
 
         else:
                 
