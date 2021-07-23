@@ -22,8 +22,8 @@ async def on_ready():
 @client.event
 async def on_typing(channel,user,when):
     userID="{}#{}".format(user.name,user.discriminator)
-    if(userID=="DeIeted User#9267" or userID=="belair#8279" or userID=="Dań#4617"):
-        if(random.randint(0,4)==0):
+    if(userID=="操你妈的逼#9267" or userID=="belair#8279" or userID=="Dań#4617"):
+        if(random.randint(0,9)==0):
             await channel.send("Shut the fuck up {}".format(user.mention))
             #Keep talking – someday you’ll say something intelligent.
     # else:
@@ -195,12 +195,12 @@ async def on_message(message):
             players=list()
 
             suits=random.randint(0,len(cards)-1)
-            print(f"Before dealers pop:{len(cards[suits])}")
-            dealers.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
+            # print(f"Before dealers pop:{len(cards[suits])}")
+            dealers.append(list((cards[suits].pop(random.randint(1,len(ranksBlack)-1)),cards[suits][0])))
             dealers.append(["<:blankbacktop:714565166070759454>","<:blankbackbot:714565093798576455>"])
-            print(f"After dealers pop:{len(cards[suits])}")            
+            # print(f"After dealers pop:{len(cards[suits])}")            
             
-            #dealerSum=cardSum(dealers)
+            # dealerSum=cardSum(dealers)
 
             suits=random.randint(0,len(cards)-1)
             players.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
@@ -239,11 +239,11 @@ async def on_message(message):
                     if(total>21):
                         await message.channel.send("You lost!")
                         break
+
                     # print(reaction.emoji)
                     # print(user.name)
                     pass
                 
-
         else:
                 
             await message.channel.send("Unknown command\n \"-cc help\" for command list")
