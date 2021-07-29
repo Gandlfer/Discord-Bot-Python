@@ -86,7 +86,7 @@ async def on_message(message):
                         description="Link for invite https://discord.com/api/oauth2/authorize?client_id=550883016524693504&permissions=8&scope=bot"
                         ,color=discord.Color.dark_red())
             helpEmbed.add_field(name="Prefix: ",value="-cc <command> <parameters>" ,inline=False)
-            helpEmbed.add_field(name="List of commands:", value="8ball\nuser-stat\nserver-stat\ncopypasta")
+            helpEmbed.add_field(name="List of commands:", value="8ball\nuser-stat\nserver-stat\ncopypasta\n")
 
             await message.channel.send(embed=helpEmbed)
 
@@ -158,11 +158,8 @@ async def on_message(message):
 
             await message.channel.send(embed=userEmbed)
 
-        elif(token[1]=="reboot"):
-            pass
-
         elif(token[1]=="copypasta"):
-
+            
             copypasta=open("copypasta","r",encoding="utf8").read()
             token=copypasta.split("cawfee")
 
@@ -196,56 +193,88 @@ async def on_message(message):
 
             suits=random.randint(0,len(cards)-1)
             # print(f"Before dealers pop:{len(cards[suits])}")
-            dealers.append(list((cards[suits].pop(random.randint(1,len(ranksBlack)-1)),cards[suits][0])))
+            dealers.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
             dealers.append(["<:blankbacktop:714565166070759454>","<:blankbackbot:714565093798576455>"])
             # print(f"After dealers pop:{len(cards[suits])}")            
             
-            # dealerSum=cardSum(dealers)
+            dealerSum=cardSum(dealers)
+            
+            suits=random.randint(0,len(cards)-1)
+            players.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
 
             suits=random.randint(0,len(cards)-1)
-            players.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
+            players.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
 
-            suits=random.randint(0,len(cards)-1)
-            players.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
+            playerSum=cardSum(players)
 
-            dealerSumMessage= await message.channel.send("Dealer's cards: {}".format(cardSum(dealers)))
+            dealerSumMessage= await message.channel.send("Dealer's cards: {}".format(dealerSum))
             dealerCardsMessage= await message.channel.send(cardsToString(dealers))
 
-            playerSumMessage= await message.channel.send("Player's cards: {}".format(cardSum(players)))
+            playerSumMessage= await message.channel.send("Player's cards: {}".format(playerSum))
             playerCardsMessage=await message.channel.send(cardsToString(players))
 
-            await playerCardsMessage.add_reaction("\U0001F447") #hit
-            await playerCardsMessage.add_reaction("\U0000270B") #stop
+            if(playerSum!=21):
+                await playerCardsMessage.add_reaction("\U0001F447") #hit
+                await playerCardsMessage.add_reaction("\U0000270B") #stop
 
-            while True:
+                while True:
 
+                    def check(reaction, user):
+                        return user == message.author and (str(reaction.emoji) == "\U0001F447" or str(reaction.emoji) == "\U0000270B")
+
+                    
+                    reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+                    if(str(reaction.emoji) == "\U0000270B"):
+                        dealers.pop()
+                        dealers.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
+                        dealerSum=cardSum(dealers)
+                        while True:
+                            suits=random.randint(0,len(cards)-1)
+                            dealers.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
+                            dealerSum=cardSum(dealers)
+                            await dealerSumMessage.edit(content="Dealer's cards: {}".format(dealerSum))
+                            await dealerCardsMessage.edit(content=cardsToString(dealers))
+                            if(dealerSum>21):
+                                await message.channel.send("Player: {} to Dealer: {}! Player win!".format(playerSum,dealerSum))
+                                break
+                            
+                            else:
+                    
+                                if(dealerSum>playerSum):
+                                    await message.channel.send("Player: {} to Dealer: {}! Dealer wins!".format(playerSum,dealerSum))
+                                    break
+
+                                elif(dealerSum==playerSum and dealerSum>=18):
+                                    await message.channel.send("Player: {} to Dealer: {}! Tie!".format(playerSum,dealerSum))
+                                    break
                                 
-
-                def check(reaction, user):
-                    return user == message.author and (str(reaction.emoji) == "\U0001F447" or str(reaction.emoji) == "\U0000270B")
-
-                
-                reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
-                if(str(reaction.emoji) == "\U0000270B"):
-                    break
-                else:
-                    #check total
-                    suits=random.randint(0,len(cards)-1)
-                    players.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
-                    total=cardSum(players)
-                    await playerSumMessage.edit(content="Player's cards: {}".format(total))
-                    await playerCardsMessage.edit(content=cardsToString(players))
-                    await playerCardsMessage.remove_reaction("\U0001F447", message.author)   
-                    if(total>21):
-                        await message.channel.send("You lost!")
                         break
 
-                    # print(reaction.emoji)
-                    # print(user.name)
-                    pass
-                
+                    else:
+                        #check total
+                        suits=random.randint(0,len(cards)-1)
+                        players.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
+                        playerSum=cardSum(players)
+                        await playerSumMessage.edit(content="Player's cards: {}".format(playerSum))
+                        await playerCardsMessage.edit(content=cardsToString(players))
+                        await playerCardsMessage.remove_reaction("\U0001F447", message.author)   
+                        if(playerSum>21):
+                            await message.channel.send("Over! Dealer wins!")
+                            break
+            else:
+                await message.channel.send("Player: {} to Dealer: {}! Player BlackJack!".format(playerSum,dealerSum))
+                    
+
+        elif(token[1]=="gif"):
+            pass
+
+        elif(token[1]=="flip"):
+            pass
+
+        elif(token[1]=="bot-info"):
+            pass
+
         else:
-                
             await message.channel.send("Unknown command\n \"-cc help\" for command list")
 
 if __name__=="__main__":
