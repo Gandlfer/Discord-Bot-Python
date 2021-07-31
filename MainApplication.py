@@ -226,8 +226,8 @@ async def on_message(message):
                     reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
                     if(str(reaction.emoji) == "\U0000270B"):
                         dealers.pop()
-                        dealers.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
-                        dealerSum=cardSum(dealers)
+                        # dealers.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
+                        # dealerSum=cardSum(dealers)
                         while True:
                             suits=random.randint(0,len(cards)-1)
                             dealers.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
