@@ -2,6 +2,7 @@ import os
 import random
 import discord
 import datetime
+from discord import user
 import mysql.connector
 from mysql.connector import errorcode
 
@@ -166,9 +167,10 @@ async def on_message(message):
             await message.channel.send(token[random.randint(0,len(token)-1)])
 
         elif(token[1]=="blackjack"):
-
+            bjEmbed=discord.Embed(title="Black Jack", color =discord.Color.dark_gold())
+            
             # Message for instructions
-            await message.channel.send("{}: hit \n {}: Stop ".format("\U0001F447","\U0000270B"))
+            bjEmbed.add_field(name="Instructions:",value="{}: hit \n\n {}: Stop".format("\U0001F447","\U0000270B"))
 
             ranksBlack=["<:bA:623575870375985162>","<:b2:623564440574623774>","<:b3:623564440545263626>",
                 "<:b4:623564440624824320>","<:b5:623564440851316760>","<:b6:623564440679350319>",
@@ -207,47 +209,53 @@ async def on_message(message):
 
             playerSum=cardSum(players)
 
-            dealerSumMessage= await message.channel.send("Dealer's cards: {}".format(dealerSum))
-            dealerCardsMessage= await message.channel.send(cardsToString(dealers))
+            bjEmbed.add_field(name="Dealer's cards [{}]: ".format(dealerSum),value=cardsToString(dealers),inline=False)
+            bjEmbed.add_field(name="Player's cards [{}]: ".format(playerSum),value=cardsToString(players),inline=False)
 
-            playerSumMessage= await message.channel.send("Player's cards: {}".format(playerSum))
-            playerCardsMessage=await message.channel.send(cardsToString(players))
+            embedMessage= await message.channel.send(embed=bjEmbed)
 
             if(playerSum!=21):
-                await playerCardsMessage.add_reaction("\U0001F447") #hit
-                await playerCardsMessage.add_reaction("\U0000270B") #stop
+                await embedMessage.add_reaction("\U0001F447") #hit
+                await embedMessage.add_reaction("\U0000270B") #stop
 
                 while True:
+
+                    bjEmbed=discord.Embed(title="Black Jack", color =discord.Color.dark_gold())
+                    bjEmbed.add_field(name="Instructions:",value="{}: hit \n\n {}: Stop".format("\U0001F447","\U0000270B"))
 
                     def check(reaction, user):
                         return user == message.author and (str(reaction.emoji) == "\U0001F447" or str(reaction.emoji) == "\U0000270B")
 
                     
-                    reaction, user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+                    reaction,user= await client.wait_for('reaction_add', timeout=60.0, check=check)
                     if(str(reaction.emoji) == "\U0000270B"):
                         dealers.pop()
-                        # dealers.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
-                        # dealerSum=cardSum(dealers)
+                        winningMessage=None
+
                         while True:
+                            
                             suits=random.randint(0,len(cards)-1)
                             dealers.append(list((cards[suits].pop(random.randint(1,len(cards[suits])-1)),cards[suits][0])))
                             dealerSum=cardSum(dealers)
-                            await dealerSumMessage.edit(content="Dealer's cards: {}".format(dealerSum))
-                            await dealerCardsMessage.edit(content=cardsToString(dealers))
+
                             if(dealerSum>21):
-                                await message.channel.send("Player: {} to Dealer: {}! Player win!".format(playerSum,dealerSum))
+                                winningMessage="Player: {} to Dealer: {}! Player win!".format(playerSum,dealerSum)
                                 break
                             
                             else:
                     
                                 if(dealerSum>playerSum):
-                                    await message.channel.send("Player: {} to Dealer: {}! Dealer wins!".format(playerSum,dealerSum))
+                                    winningMessage="Player: {} to Dealer: {}! Dealer wins!".format(playerSum,dealerSum)
                                     break
 
                                 elif(dealerSum==playerSum and dealerSum>=18):
-                                    await message.channel.send("Player: {} to Dealer: {}! Tie!".format(playerSum,dealerSum))
+                                    winningMessage="Player: {} to Dealer: {}! Tie!".format(playerSum,dealerSum)
                                     break
-                                
+
+                        bjEmbed.add_field(name="Dealer's cards [{}]: ".format(dealerSum),value=cardsToString(dealers),inline=False)
+                        bjEmbed.add_field(name="Player's cards [{}]: ".format(playerSum),value=cardsToString(players),inline=False)
+                        bjEmbed.add_field(name="Winner: ",value=winningMessage,inline=False)
+                        await embedMessage.edit(embed=bjEmbed)        
                         break
 
                     else:
@@ -255,14 +263,20 @@ async def on_message(message):
                         suits=random.randint(0,len(cards)-1)
                         players.append(list((cards[suits].pop(random.randint(1,len(cards[0])-1)),cards[suits][0])))
                         playerSum=cardSum(players)
-                        await playerSumMessage.edit(content="Player's cards: {}".format(playerSum))
-                        await playerCardsMessage.edit(content=cardsToString(players))
-                        await playerCardsMessage.remove_reaction("\U0001F447", message.author)   
+
+                        bjEmbed.add_field(name="Dealer's cards [{}]: ".format(dealerSum),value=cardsToString(dealers),inline=False)
+                        bjEmbed.add_field(name="Player's cards [{}]: ".format(playerSum),value=cardsToString(players),inline=False)
+
+                        await embedMessage.remove_reaction("\U0001F447", message.author)   
                         if(playerSum>21):
-                            await message.channel.send("Over! Dealer wins!")
+                            bjEmbed.add_field(name="Winner: ",value="Dealer: {} to Player: {}! Dealer Wins!".format(dealerSum,playerSum), inline=False)
+                            await embedMessage.edit(embed=bjEmbed)
                             break
+
+                        await embedMessage.edit(embed=bjEmbed)
             else:
-                await message.channel.send("Player: {} to Dealer: {}! Player BlackJack!".format(playerSum,dealerSum))
+                bjEmbed.add_field(name="Winner: ",value="Player: {} to Dealer: {}! Player BlackJack!".format(playerSum,dealerSum), inline=False)
+                await embedMessage.edit(embed=bjEmbed)
                     
 
         elif(token[1]=="gif"):
