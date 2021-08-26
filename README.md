@@ -1,5 +1,7 @@
 # Discord-Bot-Python
- 
+
+https://linuxize.com/post/how-to-install-ffmpeg-on-ubuntu-18-04/
+
 ### Prefix : 
 **-cc** <_command_> <parameters>
 #### List of commands (currently)
