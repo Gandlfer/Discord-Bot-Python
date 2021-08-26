@@ -1,6 +1,7 @@
 import os
 import random
 import discord
+import youtube_dl
 import datetime
 from discord import user
 import mysql.connector
@@ -13,7 +14,9 @@ intents.members=True
 intents.typing = True
 intents.presences = True
 client = discord.Client(intents=intents)
-
+queue = {}
+YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist':'True'}
+FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
 
 @client.event
 async def on_ready():
@@ -287,7 +290,76 @@ async def on_message(message):
 
         elif(token[1]=="bot-info"):
             pass
+        
+        elif (token[1]=="play"):
+            
+            if len(token)>2:
+                global queue
+                
+                if(message.guild.id not in queue.keys()):
+                    queue[message.guild.id]=list()
+                
+                print(queue[message.guild.id])
+                musicSearch=token[2:len(token)]
 
+                if(message.author.voice==None):
+                    await message.channel.send("You are not in the channel!")
+
+                else:
+                    voiceChannel=message.author.voice.channel
+                    
+                    print("voiceChannel {}".format(voiceChannel))
+                    print("Guild {}".format(message.guild))
+                    #print(client.voice_clients)
+                    voice=message.guild.voice_client
+
+                    if(voice==None):
+                        print("voice is {}".format(None))
+                        await voiceChannel.connect()
+
+                    elif(voice.channel!=message.author.voice.channel):
+                        await voice.move_to(message.author.voice.channel)  
+
+                    else:
+                        print("Connected"+str(voice.is_connected()))
+                        print("In {}".format(voice.channel))
+                    
+                    voice=message.guild.voice_client
+                    # YDL_OPTIONS = {'format': 'bestaudio', 'noplaylist':'True'}
+                    # FFMPEG_OPTIONS = {'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5', 'options': '-vn'}
+                    
+                    with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
+                        try:
+                            info = ydl.extract_info("ytsearch:%s" % musicSearch, download=False)['entries'][0]
+                        except Exception as e:
+                            print(e)
+                    print(info)
+                    url=info["url"]
+                    if(voice.is_playing()):
+                        
+                        queue[message.guild.id].append({"url":info["url"],"title":info["title"]})
+                    else:
+                        await message.channel.send("Playing {}".format(info["title"]))
+                        voice.play(discord.FFmpegPCMAudio(url,**FFMPEG_OPTIONS),after= lambda e : queue[message.guild.id].pop(0)["url"])
+
+            else:
+                await message.channel.send("Dunno what song you want")
+            
+        elif (token[1]=="skip"):
+            
+            voice=message.guild.voice_client
+            if(voice.is_connected()!=None):
+                if(voice.is_playing and len(queue[message.guild.id])>0):
+                    voice.stop()
+                    song=queue[message.guild.id].pop(0)
+                    await message.channel.send("Skipping to {}".format(song["title"]))
+                    voice.play(discord.FFmpegPCMAudio(song["url"],**FFMPEG_OPTIONS),after= lambda e : queue[message.guild.id].pop(0))
+                else:
+                    print("nothing")
+            else:
+                print("Not connected")      
+
+            
         else:
             await message.channel.send("Unknown command\n \"-cc help\" for command list")
 
