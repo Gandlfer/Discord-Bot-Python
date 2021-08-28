@@ -4,8 +4,8 @@ import discord
 import youtube_dl
 import datetime
 from discord import user
-import mysql.connector
-from mysql.connector import errorcode
+# import mysql.connector
+# from mysql.connector import errorcode
 
 #import threading
 
