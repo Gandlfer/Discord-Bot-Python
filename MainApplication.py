@@ -27,7 +27,7 @@ async def on_ready():
 async def on_typing(channel,user,when):
     userID="{}#{}".format(user.name,user.discriminator)
     if(userID=="操你妈的逼#9267" or userID=="belair#8279" or userID=="Dań#4617"):
-        if(random.randint(0,9)==0):
+        if(random.randint(0,20)==0):
             await channel.send("Shut the fuck up {}".format(user.mention))
             #Keep talking – someday you’ll say something intelligent.
     # else:
