@@ -94,7 +94,7 @@ async def on_message(message):
                         description="Link for invite https://discord.com/api/oauth2/authorize?client_id=550883016524693504&permissions=8&scope=bot"
                         ,color=discord.Color.dark_red())
             helpEmbed.add_field(name="Prefix: ",value="-cc <command> <parameters>" ,inline=False)
-            helpEmbed.add_field(name="List of commands:", value="8ball\nuser-stat\nserver-stat\ncopypasta\n")
+            helpEmbed.add_field(name="List of commands:", value="8ball\nuser-stat\nserver-stat\ncopypasta\nblackjack\n")
 
             await message.channel.send(embed=helpEmbed)
 
