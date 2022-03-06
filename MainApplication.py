@@ -4,11 +4,15 @@ import discord
 #import youtube_dl
 import datetime
 from discord import user
+from dotenv import load_dotenv
+import requests
+import json
 # import mysql.connector
 # from mysql.connector import errorcode
 
 #import threading
 
+load_dotenv()
 intents = discord.Intents.default()
 intents.members=True
 intents.typing = True
@@ -163,11 +167,19 @@ async def on_message(message):
             await message.channel.send(embed=userEmbed)
 
         elif(token[1]=="copypasta"):
+            count=json.loads(requests.get("http://"+os.getenv("ADDR")+":"+os.getenv("HTTPPORT")+"/copypasta/count").content.decode("utf-8"))["data"]["count"]
             
-            copypasta=open("copypasta","r",encoding="utf8").read()
-            token=copypasta.split("cawfee")
-
-            await message.channel.send(token[random.randint(0,len(token)-1)])
+            if (len(token)>2):
+                if(int(token[2])>count):
+                    await message.channel.send("Can't retrieve copypasta number: {}.\nRange between 1 - {}".format(token[2],count))
+                    return
+                req=requests.get("http://"+os.getenv("ADDR")+":"+os.getenv("HTTPPORT")+"/copypasta/getraw/"+str(token[2]))
+            else:
+                #sum=json.loads(requests.get("http://"+os.getenv("ADDR")+":"+os.getenv("HTTPPORT")+"/copypasta/count").content.decode("utf-8"))["data"]["count"]
+                req=requests.get("http://"+os.getenv("ADDR")+":"+os.getenv("HTTPPORT")+"/copypasta/getraw/"+str(random.randint(1,count)))
+            
+            toJson=json.loads(req.content.decode("utf-8"))
+            await message.channel.send(toJson["data"]["copypasta"]+"\n"+"Copypasta number: {}".format(toJson["data"]["index"]))
 
         elif(token[1]=="blackjack"):
             bjEmbed=discord.Embed(title="Black Jack", color =discord.Color.dark_gold())
@@ -365,9 +377,6 @@ async def on_message(message):
 
 if __name__=="__main__":
 
-    token = open("bot-token","r").read().split("\n")
-    db=token[1].split(",")
-
     # try:
 
     #     mydb=mysql.connector.connect(host=db[0],user=db[1],password=db[2])
@@ -377,4 +386,4 @@ if __name__=="__main__":
     #     db=token[2].split(",")
     #     mydb=mysql.connector.connect(host=db[0],user=db[1],password=db[2])
 
-    client.run(token[0])
+    client.run(os.getenv("TOKEN"))
