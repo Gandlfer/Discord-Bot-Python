@@ -1,0 +1,6 @@
+.gitignore
+.env
+copypasta
+LICENSE
+copypasteWriteToMongo.py
+README.md
